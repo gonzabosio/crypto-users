@@ -28,7 +28,7 @@ func main() {
 
 	user := new(data.User)
 
-	err = db.AutoMigrate(&data.User{})
+	err = db.AutoMigrate(&data.User{}, &data.Activity{})
 	if err != nil {
 		log.Fatal("auto migration failed")
 	}
