@@ -56,15 +56,20 @@ func GetActions(c echo.Context) error {
 }
 
 func GetAllUserActions(c echo.Context) error {
-	var users data.User
-	result := data.DB.Preload("Activity").
+	var users []data.User
+	result := data.DB.Table("\"User\"").
 		Select("\"User\".id, \"User\".username").
-		Joins("JOIN \"Activity\" ON \"User\".id=\"Activity\".user_id").Find(&users)
+		Joins("JOIN \"Activity\" ON \"User\".id=\"Activity\".user_id").Group("\"User\".id").Find(&users)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
 			return c.String(http.StatusNotFound, "Actions not found")
 		}
 		return c.String(http.StatusInternalServerError, "Failed to retrieve actions")
+	}
+	for i := range users {
+		var activities []data.Activity
+		data.DB.Where("user_id = ?", users[i].ID).Find(&activities)
+		users[i].Activity = activities
 	}
 
 	return c.JSON(http.StatusOK, users)
