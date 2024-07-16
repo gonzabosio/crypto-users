@@ -6,10 +6,9 @@ import (
 	"os"
 
 	"github.com/gonzabosio/crypto-users/data"
+	"github.com/gonzabosio/crypto-users/routes"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
 
 func main() {
@@ -18,25 +17,23 @@ func main() {
 		log.Fatal("error loading .env data:", err)
 	}
 
-	dsn := os.Getenv("CONN_STR")
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Fatal("failed to connect database", err)
-	} else {
-		log.Printf("successful database connection")
-	}
-
-	user := new(data.User)
-
-	err = db.AutoMigrate(&data.User{}, &data.Activity{})
-	if err != nil {
-		log.Fatal("auto migration failed")
-	}
-	db.Raw("SELECT username FROM \"User\"").Scan(&user)
+	data.Init()
 
 	e := echo.New()
 
-	e.GET("/", func(c echo.Context) error { return c.String(http.StatusOK, "Hello world") })
+	e.GET("/", func(c echo.Context) error { return c.String(http.StatusOK, "Crypto Users API") })
+
+	e.POST("/users", routes.PostUser)
+
+	e.POST("/actions", routes.PostAction)
+
+	e.GET("/actions", routes.GetAllUserActions)
+
+	e.GET("/actions/:id", routes.GetActions)
+
+	e.PATCH("/actions/:id", routes.PatchAction)
+
+	e.DELETE("/actions/:id", routes.DeleteAction)
 
 	e.Logger.Fatal(e.Start(":" + os.Getenv("PORT")))
 }
