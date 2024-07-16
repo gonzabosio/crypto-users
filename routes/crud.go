@@ -4,11 +4,32 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gonzabosio/crypto-users/data"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
+
+func GetUserLogin(c echo.Context) error {
+	var user data.User
+	err := c.Bind(&user)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "body request binding failed")
+	}
+	var dbUser data.User
+	result := data.DB.Where("username = ?", user.Username).First(&dbUser)
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return c.String(http.StatusNotFound, "user not found")
+		}
+		return c.String(http.StatusInternalServerError, "get user data failed")
+	}
+	if err = data.VerifyPassword(dbUser.Password, user.Password); err != nil {
+		return c.String(http.StatusUnauthorized, "Incorrect password")
+	}
+	return c.String(http.StatusOK, "user can log in")
+}
 
 func PostUser(c echo.Context) error {
 	var user data.User
@@ -21,7 +42,10 @@ func PostUser(c echo.Context) error {
 	}
 	user.Password = pw
 	result := data.DB.Create(&user)
-	if result.Error != nil {
+	if err := result.Error; err != nil {
+		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+			return c.String(http.StatusConflict, "Username already exists")
+		}
 		return c.String(http.StatusInternalServerError, "record creation failed")
 	}
 	response := fmt.Sprintf("new user added id: %v | username: %v", user.ID, user.Username)
@@ -62,9 +86,9 @@ func GetAllUserActions(c echo.Context) error {
 		Joins("JOIN \"Activity\" ON \"User\".id=\"Activity\".user_id").Group("\"User\".id").Find(&users)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
-			return c.String(http.StatusNotFound, "Actions not found")
+			return c.String(http.StatusNotFound, "actions not found")
 		}
-		return c.String(http.StatusInternalServerError, "Failed to retrieve actions")
+		return c.String(http.StatusInternalServerError, "failed to retrieve actions")
 	}
 	for i := range users {
 		var activities []data.Activity
@@ -86,14 +110,14 @@ func PatchAction(c echo.Context) error {
 	result := data.DB.First(&act, id)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
-			return c.String(http.StatusNotFound, "Action not found")
+			return c.String(http.StatusNotFound, "action not found")
 		}
 		return c.String(http.StatusInternalServerError, "Failed to retrieve action")
 	}
 
 	var updateAction data.UpdateActivity
 	if err = c.Bind(&updateAction); err != nil {
-		return c.String(http.StatusBadRequest, "Failed to bind request")
+		return c.String(http.StatusBadRequest, "failed to bind request")
 	}
 	if updateAction.Action != nil {
 		act.Action = *updateAction.Action
