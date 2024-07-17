@@ -1,23 +1,16 @@
 package main
 
 import (
-	"log"
 	"net/http"
 	"os"
 
 	"github.com/gonzabosio/crypto-users/data"
 	"github.com/gonzabosio/crypto-users/routes"
-	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("error loading .env data:", err)
-	}
-
 	data.Init()
 
 	e := echo.New()
