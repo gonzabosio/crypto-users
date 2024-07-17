@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func GetUserLogin(c echo.Context) error {
+func UserLogin(c echo.Context) error {
 	var user data.User
 	err := c.Bind(&user)
 	if err != nil {
@@ -21,7 +21,7 @@ func GetUserLogin(c echo.Context) error {
 	result := data.DB.Where("username = ?", user.Username).First(&dbUser)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
-			return c.String(http.StatusNotFound, "user not found")
+			return c.String(http.StatusNotFound, "User not found")
 		}
 		return c.String(http.StatusInternalServerError, "get user data failed")
 	}
