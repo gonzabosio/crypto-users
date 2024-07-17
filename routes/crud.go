@@ -28,7 +28,11 @@ func UserLogin(c echo.Context) error {
 	if err = data.VerifyPassword(dbUser.Password, user.Password); err != nil {
 		return c.String(http.StatusUnauthorized, "Incorrect password")
 	}
-	return c.String(http.StatusOK, "user can log in")
+	userData := data.UserData{
+		ID:       fmt.Sprintf("%v", dbUser.ID),
+		Username: dbUser.Username,
+	}
+	return c.JSON(http.StatusOK, userData)
 }
 
 func PostUser(c echo.Context) error {
@@ -48,8 +52,11 @@ func PostUser(c echo.Context) error {
 		}
 		return c.String(http.StatusInternalServerError, "record creation failed")
 	}
-	response := fmt.Sprintf("new user added id: %v | username: %v", user.ID, user.Username)
-	return c.String(http.StatusOK, response)
+	userData := data.UserData{
+		ID:       fmt.Sprintf("%v", user.ID),
+		Username: user.Username,
+	}
+	return c.JSON(http.StatusOK, userData)
 }
 
 func PostAction(c echo.Context) error {

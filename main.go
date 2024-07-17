@@ -30,6 +30,12 @@ func main() {
 	}
 	e.Use(middleware.RateLimiterWithConfig(config))
 
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{os.Getenv("HOST"), "https://crypto-bull-gb.vercel.app"},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, "x-apikey"},
+		AllowMethods: []string{echo.GET, echo.PATCH, echo.POST, echo.DELETE},
+	}))
+
 	e.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
 		KeyLookup: "header:x-apikey",
 		Validator: func(key string, c echo.Context) (bool, error) {

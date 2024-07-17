@@ -82,3 +82,8 @@ type UpdateActivity struct {
 	CryptoAmount *float32 `json:"crypto_amount,omitempty"`
 	Money        *float32 `json:"money,omitempty"`
 }
+
+type UserData struct {
+	ID       string `json:"user_id"`
+	Username string `json:"username"`
+}
