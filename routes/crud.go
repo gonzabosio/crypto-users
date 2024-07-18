@@ -2,6 +2,7 @@ package routes
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -60,14 +61,26 @@ func PostUser(c echo.Context) error {
 }
 
 func PostAction(c echo.Context) error {
-	var act data.Activity
+	var act data.ActivityPostAdapted
 	err := c.Bind(&act)
 	if err != nil {
 		return c.String(http.StatusBadRequest, "bad request: "+err.Error())
 	}
-	result := data.DB.Create(&act)
+	id, err := strconv.Atoi(act.UserID)
+	if err != nil {
+		log.Fatal("convert id failed" + err.Error())
+	}
+	activity := data.Activity{
+		Action:       act.Action,
+		CryptoCode:   act.CryptoCode,
+		CryptoAmount: act.CryptoAmount,
+		Money:        act.Money,
+		CreatedAt:    act.CreatedAt,
+		UserID:       uint(id),
+	}
+	result := data.DB.Create(&activity)
 	if result.Error != nil {
-		return c.String(http.StatusInternalServerError, "activity creation failed")
+		return c.String(http.StatusInternalServerError, "activity creation failed: "+result.Error.Error())
 	}
 	return c.String(http.StatusOK, "activity created successfully")
 }
@@ -78,10 +91,23 @@ func GetActions(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "id to int failed")
 	}
-	var activities []data.Activity
-	result := data.DB.Where("\"Activity\".user_id = ?", id).Find(&activities)
+	var dbActivities []data.Activity
+	result := data.DB.Where("\"Activity\".user_id = ?", id).Find(&dbActivities)
 	if err = result.Error; err != nil {
 		return fmt.Errorf("actions of user get method failed: " + err.Error())
+	}
+	var activities []data.ActivityGetAdapted
+	for _, activity := range dbActivities {
+		activityGetMethod := data.ActivityGetAdapted{
+			ID:           fmt.Sprintf("%v", activity.ID),
+			Action:       activity.Action,
+			CryptoCode:   activity.CryptoCode,
+			CryptoAmount: activity.CryptoAmount,
+			Money:        activity.Money,
+			CreatedAt:    activity.CreatedAt,
+			UserID:       fmt.Sprintf("%v", activity.UserID),
+		}
+		activities = append(activities, activityGetMethod)
 	}
 	return c.JSON(http.StatusOK, activities)
 }
@@ -122,7 +148,7 @@ func PatchAction(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "Failed to retrieve action")
 	}
 
-	var updateAction data.UpdateActivity
+	var updateAction data.PatchActivity
 	if err = c.Bind(&updateAction); err != nil {
 		return c.String(http.StatusBadRequest, "failed to bind request")
 	}
