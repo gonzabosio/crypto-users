@@ -12,6 +12,10 @@ import (
 )
 
 func main() {
+	// err := godotenv.Load()
+	// if err != nil {
+	// 	log.Fatal("Fail loading env")
+	// }
 	data.Init()
 
 	e := echo.New()

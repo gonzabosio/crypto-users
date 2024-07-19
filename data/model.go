@@ -5,16 +5,17 @@ import (
 )
 
 type User struct {
-	ID       int64      `json:"user_id" gorm:"primaryKey"`
+	ID       uint       `json:"user_id" gorm:"primaryKey"`
 	Username string     `json:"username" gorm:"unique"`
 	Password string     `json:"password"`
 	Activity []Activity `json:"activity" gorm:"foreignKey:UserID"`
 }
 
 type Activity struct {
-	ID           int64     `json:"activity_id" gorm:"primaryKey"`
+	ID           uint      `json:"activity_id" gorm:"primaryKey"`
 	Action       string    `json:"action"`
 	CryptoCode   string    `json:"crypto_code"`
+	Currency     string    `json:"currency"`
 	CryptoAmount float32   `json:"crypto_amount"`
 	Money        float32   `json:"money"`
 	CreatedAt    time.Time `json:"performed_at"`
@@ -33,6 +34,7 @@ type ActivityGetAdapted struct {
 	ID           string    `json:"activity_id" gorm:"primaryKey"`
 	Action       string    `json:"action"`
 	CryptoCode   string    `json:"crypto_code"`
+	Currency     string    `json:"currency"`
 	CryptoAmount float32   `json:"crypto_amount"`
 	Money        float32   `json:"money"`
 	CreatedAt    time.Time `json:"performed_at"`
@@ -42,6 +44,7 @@ type ActivityGetAdapted struct {
 type ActivityPostAdapted struct {
 	Action       string    `json:"action"`
 	CryptoCode   string    `json:"crypto_code"`
+	Currency     string    `json:"currency"`
 	CryptoAmount float32   `json:"crypto_amount"`
 	Money        float32   `json:"money"`
 	CreatedAt    time.Time `json:"performed_at"`
@@ -51,6 +54,7 @@ type ActivityPostAdapted struct {
 type PatchActivity struct {
 	Action       *string  `json:"action,omitempty"`
 	CryptoCode   *string  `json:"crypto_code,omitempty"`
+	Currency     *string  `json:"currency,omitempty"`
 	CryptoAmount *float32 `json:"crypto_amount,omitempty"`
 	Money        *float32 `json:"money,omitempty"`
 }

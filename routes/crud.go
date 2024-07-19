@@ -73,6 +73,7 @@ func PostAction(c echo.Context) error {
 	activity := data.Activity{
 		Action:       act.Action,
 		CryptoCode:   act.CryptoCode,
+		Currency:     act.Currency,
 		CryptoAmount: act.CryptoAmount,
 		Money:        act.Money,
 		CreatedAt:    act.CreatedAt,
@@ -102,12 +103,16 @@ func GetActions(c echo.Context) error {
 			ID:           fmt.Sprintf("%v", activity.ID),
 			Action:       activity.Action,
 			CryptoCode:   activity.CryptoCode,
+			Currency:     activity.Currency,
 			CryptoAmount: activity.CryptoAmount,
 			Money:        activity.Money,
 			CreatedAt:    activity.CreatedAt,
 			UserID:       fmt.Sprintf("%v", activity.UserID),
 		}
 		activities = append(activities, activityGetMethod)
+	}
+	for i, j := 0, len(activities)-1; i < j; i, j = i+1, j-1 {
+		activities[i], activities[j] = activities[j], activities[i]
 	}
 	return c.JSON(http.StatusOK, activities)
 }
@@ -155,11 +160,14 @@ func PatchAction(c echo.Context) error {
 	if updateAction.Action != nil {
 		act.Action = *updateAction.Action
 	}
-	if updateAction.CryptoAmount != nil {
-		act.CryptoAmount = *updateAction.CryptoAmount
-	}
 	if updateAction.CryptoCode != nil {
 		act.CryptoCode = *updateAction.CryptoCode
+	}
+	if updateAction.Currency != nil {
+		act.Currency = *updateAction.Currency
+	}
+	if updateAction.CryptoAmount != nil {
+		act.CryptoAmount = *updateAction.CryptoAmount
 	}
 	if updateAction.Money != nil {
 		act.Money = *updateAction.Money
