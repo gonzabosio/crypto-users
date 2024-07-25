@@ -12,13 +12,13 @@ type User struct {
 }
 
 type Activity struct {
-	ID           uint      `json:"act_id" gorm:"primaryKey"`
+	ID           uint      `json:"activity_id" gorm:"primaryKey"`
 	Action       string    `json:"action"`
 	CryptoCode   string    `json:"crypto_code"`
+	Currency     string    `json:"currency"`
 	CryptoAmount float32   `json:"crypto_amount"`
 	Money        float32   `json:"money"`
-	CreatedAt    time.Time `json:"made_at"`
-	UpdatedAt    time.Time `json:"modified_at"`
+	CreatedAt    time.Time `json:"performed_at"`
 	UserID       uint      `json:"user_id"`
 }
 
@@ -28,4 +28,38 @@ func (User) TableName() string {
 
 func (Activity) TableName() string {
 	return "Activity"
+}
+
+type ActivityGetAdapted struct {
+	ID           string    `json:"activity_id" gorm:"primaryKey"`
+	Action       string    `json:"action"`
+	CryptoCode   string    `json:"crypto_code"`
+	Currency     string    `json:"currency"`
+	CryptoAmount float32   `json:"crypto_amount"`
+	Money        float32   `json:"money"`
+	CreatedAt    time.Time `json:"performed_at"`
+	UserID       string    `json:"user_id"`
+}
+
+type ActivityPostAdapted struct {
+	Action       string    `json:"action"`
+	CryptoCode   string    `json:"crypto_code"`
+	Currency     string    `json:"currency"`
+	CryptoAmount float32   `json:"crypto_amount"`
+	Money        float32   `json:"money"`
+	CreatedAt    time.Time `json:"performed_at"`
+	UserID       string    `json:"user_id"`
+}
+
+type PatchActivity struct {
+	Action       *string  `json:"action,omitempty"`
+	CryptoCode   *string  `json:"crypto_code,omitempty"`
+	Currency     *string  `json:"currency,omitempty"`
+	CryptoAmount *float32 `json:"crypto_amount,omitempty"`
+	Money        *float32 `json:"money,omitempty"`
+}
+
+type UserData struct {
+	ID       string `json:"user_id"`
+	Username string `json:"username"`
 }
